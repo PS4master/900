@@ -94,10 +94,15 @@
     opacity:.88;
   }
 
+  /* 🔥 Selected پایین با 20px فاصله */
   .footer-info{
-    margin-top: 26px;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 18px;
     color: #cfe1ff;
+    z-index: 9990;
   }
 
   #cache-status{
@@ -137,11 +142,11 @@
     <img src="wolf_optimized.webp"><p>The wolf hack</p>
   </div>
 
-  <div class="item" tabindex="0" data-name="ps4idea" data-url="https://ps4idea.github.io/900/">
+  <div class="item" tabindex="0" data-name="Jailbreak Without USB" data-url="https://ps4idea.github.io/900/">
     <img src="no usb.webp"><p>Ps4 idea</p>
   </div>
 
-  <div class="item" tabindex="0" data-name="Karo host" data-url="https://karo218.ir/">
+  <div class="item" tabindex="0" data-name="Karo host fot jailbreak" data-url="https://karo218.ir/">
     <img src="karo.webp"><p>Karo host</p>
   </div>
 
@@ -151,8 +156,10 @@
 
 </div>
 
+<!-- 🔥 Selected پایین -->
 <div class="footer-info">Selected: <span id="selected">PS4 Firmwares</span></div>
 
+<!-- 🔥 متن درصد کش -->
 <div id="cache-status">Installing offline cache… 0%</div>
 
 <script>
@@ -167,7 +174,7 @@
     items.forEach((it,idx)=>{
       it.classList.toggle('selected',idx===i);
       if(idx===i){
-        selected.textContent = it.dataset.name;
+        selected.textContent = it.dataset.name; 
         if(document.activeElement!==it) it.focus({preventScroll:true});
       }
     });
@@ -215,11 +222,3 @@ if('serviceWorker' in navigator){
 
 </body>
 </html>
-
-
-
-
-
-
-
-
