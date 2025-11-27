@@ -1,4 +1,4 @@
-const CACHE_NAME = "ps4host-v1";
+const CACHE_NAME = "ps4host-v2";
 
 const FILES_TO_CACHE = [
   "./",
@@ -12,52 +12,37 @@ const FILES_TO_CACHE = [
   "ps4-luminous-wave-0xd36pumgigbl01x.jpg"
 ];
 
-function sendStatus(msg){
-  self.clients.matchAll().then(clients=>{
-    clients.forEach(c=>c.postMessage(msg));
-  });
-}
-
+// نصب Service Worker و کش کردن فایل‌ها
 self.addEventListener("install", event => {
-  event.waitUntil((async ()=>{
-    const cache = await caches.open(CACHE_NAME);
-
-    let done = 0;
-    const total = FILES_TO_CACHE.length;
-
-    for(const file of FILES_TO_CACHE){
-      await cache.add(file);
-      done++;
-      sendStatus({
-        type: "CACHE_PROGRESS",
-        percent: Math.round((done / total) * 100)
-      });
-    }
-  })());
-
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(FILES_TO_CACHE);
+    })
+  );
   self.skipWaiting();
 });
 
+// فعال‌سازی
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(k => k !== CACHE_NAME ? caches.delete(k) : null))
-    )
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(k => {
+          if(k !== CACHE_NAME){
+            return caches.delete(k);
+          }
+        })
+      );
+    })
   );
   self.clients.claim();
 });
 
+// واکشی فایل‌ها (اول کش، بعد اینترنت)
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(r => r || fetch(event.request))
+    caches.match(event.request).then(res => {
+      return res || fetch(event.request);
+    })
   );
 });
-
-
-
-
-
-
-
-
-
