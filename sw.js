@@ -1,40 +1,36 @@
-// نسخه جدید SW مخصوص PS4
-const CACHE_NAME = "ps4-hub-v1";
+const CACHE_NAME = "ps4host-v1";
 
 const FILES_TO_CACHE = [
-  "/",
+  "./",
   "index.html",
-
-  // فایل‌های UI
-  "style.css",
-
-  // تصاویر
   "find.png",
   "goldhen.png",
   "wolf_optimized.webp",
   "no usb.webp",
+  "karo.webp",
   "Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp",
-  "ps4-luminous-wave-0xd36pumgigbl01x.jpg",
-  "karo.webp"
+  "ps4-luminous-wave-0xd36pumgigbl01x.jpg"
 ];
 
-// نصب Service Worker
+// نصب Service Worker و کش کردن فایل‌ها
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
+    caches.open(CCACHE_NAME).then(cache => {
       return cache.addAll(FILES_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
-// فعال‌سازی و پاک‌سازی کش‌های قدیمی
+// فعال‌سازی
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) return caches.delete(key);
+        keys.map(k => {
+          if(k !== CACHE_NAME){
+            return caches.delete(k);
+          }
         })
       );
     })
@@ -42,20 +38,14 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// مدیریت درخواست‌ها
+// واکشی فایل‌ها (اول کش، بعد اینترنت)
 self.addEventListener("fetch", event => {
-
-  // درخواست‌های داخلی → cache-first
-  if (event.request.url.startsWith(self.location.origin)) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        return cached || fetch(event.request);
-      })
-    );
-    return;
-  }
-
-  // درخواست‌های خارجی → مستقیم از اینترنت
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    caches.match(event.request).then(res => {
+      return res || fetch(event.request);
+    })
+  );
 });
+
+
 
