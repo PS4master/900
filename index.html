@@ -41,22 +41,31 @@
     box-shadow: 0 5px 12px rgba(0,0,0,0.35);
   }
 
-  h1{
-    margin-top: 100px;
+  /* 🔥 Selected جای h1 قبلی */
+  .footer-info {
+    position: fixed;
+    top: 95px;
+    left: 50%;
+    transform: translateX(-50%);
     font-size: 22px;
+    color: #cfe1ff;
     font-weight: 600;
-    color: #e6eef8;
+    z-index: 9990;
   }
 
-  .menu{
-    display:flex;
-    justify-content:center;
-    gap:28px;
-    margin:36px auto;
-    max-width:980px;
-    padding:18px;
-    flex-wrap:wrap;
-  }
+  /* تا منو نره بالا */
+ 
+.menu{
+  display:flex;
+  justify-content:center;
+  gap:28px;
+  margin:36px auto;
+  max-width:980px;
+  padding:18px;
+  flex-wrap:wrap;
+  margin-top: 140px; /* فاصله دقیق برای اینکه Selected بالا باشه و منو وسط سایت بمونه */
+}
+
 
   .item{
     width:110px;
@@ -94,17 +103,6 @@
     opacity:.88;
   }
 
-  /* 🔥 Selected پایین با 20px فاصله */
-  .footer-info{
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 18px;
-    color: #cfe1ff;
-    z-index: 9990;
-  }
-
   #cache-status{
     position:fixed;
     bottom:6px;
@@ -126,7 +124,8 @@
   <span>offline cache enabled</span>
 </div>
 
-<h1>PS4 jailbreaks menu</h1>
+<!-- 🔥 Selected آمده جای h1 -->
+<div class="footer-info">Selected: <span id="selected">PS4 Firmwares</span></div>
 
 <div class="menu" id="menu">
 
@@ -146,7 +145,7 @@
     <img src="no usb.webp"><p>Ps4 idea</p>
   </div>
 
-  <div class="item" tabindex="0" data-name="Karo host fot jailbreak" data-url="https://karo218.ir/">
+  <div class="item" tabindex="0" data-name="Karo host for jailbreak" data-url="https://karo218.ir/">
     <img src="karo.webp"><p>Karo host</p>
   </div>
 
@@ -156,10 +155,6 @@
 
 </div>
 
-<!-- 🔥 Selected پایین -->
-<div class="footer-info">Selected: <span id="selected">PS4 Firmwares</span></div>
-
-<!-- 🔥 متن درصد کش -->
 <div id="cache-status">Installing offline cache… 0%</div>
 
 <script>
@@ -174,7 +169,7 @@
     items.forEach((it,idx)=>{
       it.classList.toggle('selected',idx===i);
       if(idx===i){
-        selected.textContent = it.dataset.name; 
+        selected.textContent = it.dataset.name;
         if(document.activeElement!==it) it.focus({preventScroll:true});
       }
     });
