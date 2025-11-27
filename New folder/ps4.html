@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayStation 4 UI</title>
+    
+    <style>
+        /* --- کلاس‌های Tailwind مورد نیاز (برای پایداری) --- */
+        .h-6 { height: 1.5rem; }
+        .w-6 { width: 1.5rem; }
+        .text-gray-400 { color: #9ca3af; }
+        .hover\:text-white:hover { color: #fff; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .gap-4 { gap: 1rem; }
+        .justify-center { justify-content: center; }
+        .w-full { width: 100%; }
+        .text-xl { font-size: 1.25rem; }
+        .font-bold { font-weight: 700; }
+        .mb-4 { margin-bottom: 1rem; }
+        .text-white { color: #fff; }
+        .p-3 { padding: 0.75rem; }
+        .border-blue-500 { border-color: #3b82f6; }
+        .rounded-full { border-radius: 9999px; }
+        .bg-gray-900 { background-color: #1f2937; } 
+        .text-gray-300 { color: #d1d5db; } 
+        .text-lg { font-size: 1.125rem; } 
+        .mr-2 { margin-right: 0.5rem; } 
+
+        /* --- استایل‌های اصلی UI و بهینه‌سازی PS4 --- */
+        
+        body {
+            font-family: sans-serif; 
+            color: #d1d5db;
+            overflow: hidden;
+            user-select: none;
+            transform-origin: center center;
+            perspective: 1000px;
+            
+            /* **تصویر پس‌زمینه ثابت** */
+            background-image: url('ps4-luminous-wave-0xd36pumgigbl01x.jpg'); 
+            background-color: #0d121c; 
+            background-size: cover; 
+            background-attachment: fixed;
+            background-position: center center;
+        }
+        
+        .ps4-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .icon-row {
+            display: flex;
+            align-items: center;
+            gap: 4rem;
+            transform: scale(0.75);
+            transition: transform 0.5s ease-in-out;
+            will-change: transform;
+            
+            /* جابجایی به سمت بالا (عمودی) */
+            margin-top: -5rem; 
+            
+            /* جابجایی دستی برای مرکزیت بصری در PS4 */
+            margin-left: -25px; 
+        }
+
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform, filter;
+            filter: grayscale(100%) opacity(0.6);
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+        
+        .icon-item.loaded {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        .icon-item img {
+            width: 150px;
+            height: 150px;
+            border-radius: 1rem;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .icon-item .icon-title {
+            margin-top: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-align: center;
+            color: #6b7280;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .icon-item.active {
+            transform: scale(1.3);
+            filter: grayscale(0%) opacity(1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .icon-item.active img {
+            transform: scale(1.1);
+        }
+
+        .icon-item.active .icon-title {
+            color: white;
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .details-panel {
+            min-height: 200px;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 2rem;
+            padding: 2rem;
+            background-color: rgba(14, 20, 31, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(48, 59, 81, 0.3);
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            will-change: opacity;
+            /* **مهم:** تنظیم موقعیت برای جابجایی زنگوله نسبت به این پنل */
+            position: relative; 
+        }
+
+        .details-panel.show {
+            opacity: 1;
+        }
+        
+        /* محتوای داخلی توضیحات را کمی به راست هل می‌دهیم تا با زنگوله تداخل نداشته باشد */
+        #details-content {
+            padding-right: 30px; 
+        }
+
+        #details-content h2 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e5e7eb;
+            margin-bottom: 0.5rem;
+        }
+
+        #details-content p {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #d1d5db;
+        }
+
+        .top-bar, .bottom-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            position: absolute;
+            z-index: 20;
+        }
+        
+        .top-bar { 
+            top: 0; 
+            min-height: 60px; /* رفع باگ جابجایی */
+        } 
+        .bottom-bar { bottom: 0; } 
+        
+        /* --- استایل‌های جدید برای Tooltip زنگوله (مکان جدید) --- */
+        
+        /* **مکان‌دهی آیکون زنگوله نسبت به Details Panel** */
+        #details-panel-bell {
+            position: absolute;
+            left: -35px; /* جابجایی به سمت چپ (بیرون از پنل) */
+            top: 30px; /* پایین‌تر از لبه بالایی پنل */
+            z-index: 30; 
+        }
+        
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip-trigger {
+            display: flex;
+            align-items: center;
+            text-decoration: none; 
+            cursor: pointer;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            
+            /* Position the tooltip */
+            position: absolute;
+            z-index: 100;
+            top: 35px; /* زیر آیکون قرار می‌گیرد */
+            left: 50%;
+            margin-left: -60px; 
+            
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+        }
+        /* ------------------------------------------- */
+
+
+        /* سایر استایل‌ها (بدون تغییر) */
+        .arshia-text {
+            color: #FFD700;
+            text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700;
+        }
+        .shape-icon {
+            width: 15px;
+            height: 15px;
+            background-color: #FFD700;
+            box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+            margin: 0 10px;
+            text-align: center;
+        }
+        .circle-shape { border-radius: 50%; }
+        .square-shape { border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-300">
+
+    <div id="exit-overlay" class="exit-overlay"></div>
+    
+    <header class="top-bar">
+        <div class="user-info">
+        </div>
+        
+        <div class="time-info">
+            <span id="current-time"></span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="battery-icon">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </span>
+        </div>
+    </header>
+
+    <main class="ps4-container">
+        <section id="icon-row" class="icon-row">
+        </section>
+
+        <div id="details-panel" class="details-panel">
+            
+            <span id="details-panel-bell" class="notification-icon tooltip-container">
+                <a href="read_before_use.html" class="tooltip-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400 hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span class="tooltip-text">read before use</span>
+                </a>
+            </span>
+            <div id="details-content">
+            </div>
+            
+        </div>
+    </main>
+
+    <div id="goldhen-progress-overlay" class="progress-overlay">
+        <div class="progress-box">
+            <h3 id="progress-status" class="text-xl font-bold mb-4 text-white">Connecting to the server...</h3>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bottom-bar">
+        <div class="flex items-center justify-center w-full">
+            <div class="shape-icon circle-shape"></div>
+            <span class="arshia-text text-xl font-bold">made it by arshia</span>
+            <div class="shape-icon square-shape"></div>
+        </div>
+    </footer>
+
+    <script>
+        const icons = [
+            { name: "Home", image: "Ps4.png", neonColor: "rgba(85, 172, 238, 0.7)", url: "index.html" },
+            { name: "the wolf hack", image: "host.png", neonColor: "rgba(231, 76, 60, 0.7)", url: "https://wolf-5.github.io/900c/index.html" },
+            { name: "Goldhen", image: "goldhen.png", neonColor: "yellow", url: "GoldHEN_v2.4b18.5.7z" },
+            { name: "fimwares", image: "find.png", neonColor: "purple", url: "https://darthsternie.net/ps4-firmwares/" },
+            { name: "Jailbreak with no USB", image: "pngfind.com-ps4-logo-png-983235.png", neonColor: "blue", url: "https://ps4idea.github.io/900" },
+            { name: "another host", image: "gogo.png", neonColor: "rgba(112, 128, 144, 0.7)", url: "bb.html" },
+        ];
+
+        const details = {
+            "Home": { title: "Home", description: "" },
+            "the wolf hack": { title: "the wolf hack", description: "to jailbreak your ps4 exploit 9.00" },
+            "Goldhen": { title: "Goldhen", description: "download goldhen lstest version" },
+            "fimwares": { title: "fimwares", description: "to download updates" },
+            "Jailbreak with no USB": { title: "jail break ps4 with no USB", description: "jailbreak your ps4 9.00 but you dont need any usb" },
+            "another host": { title: "another host", description: "see another hosts" },
+        };
+
+        let activeIndex = icons.findIndex(icon => icon.name === "the wolf hack");
+        const iconRow = document.getElementById('icon-row');
+        const detailsPanel = document.getElementById('details-panel');
+        const detailsContent = document.getElementById('details-content');
+        const exitOverlay = document.getElementById('exit-overlay'); 
+        
+        let isAnimating = false;
+
+        function animateIcons() {
+            const iconItems = iconRow.querySelectorAll('.icon-item');
+            iconItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('loaded');
+                }, index * 150);
+            });
+        }
+
+        function renderIcons() {
+            iconRow.innerHTML = '';
+            icons.forEach((icon, index) => {
+                const iconItem = document.createElement('div');
+                iconItem.className = `icon-item ${index === activeIndex ? 'active' : ''}`;
+                iconItem.innerHTML = `
+                    <img src="${icon.image}" alt="${icon.name}">
+                    <span class="icon-title">${icon.name}</span>
+                `;
+                iconItem.addEventListener('click', () => {
+                    if (isAnimating) return;
+                    
+                    selectIcon(index); 
+                    
+                    setTimeout(() => {
+                        navigateToActiveIcon(); 
+                    }, 50); 
+                });
+                iconRow.appendChild(iconItem);
+            });
+            
+            setTimeout(() => {
+                animateIcons();
+                setTimeout(() => {
+                    selectIcon(activeIndex);
+                }, icons.length * 150 + 100);
+            }, 100);
+        }
+
+        function updateDetailsPanel(index) {
+            const selectedIconName = icons[index].name;
+            const currentDetails = details[selectedIconName];
+            
+            // **تنها بخش داخلی Details Content به‌روز می‌شود**
+            detailsContent.innerHTML = `
+                <h2>${currentDetails.title}</h2>
+                <p>${currentDetails.description}</p>
+            `;
+            detailsPanel.classList.add('show');
+        }
+
+        function selectIcon(index) {
+            
+            const oldActiveItem = iconRow.querySelector('.icon-item.active');
+            if (oldActiveItem) {
+                oldActiveItem.classList.remove('active');
+                oldActiveItem.querySelector('img').style.boxShadow = 'none';
+            }
+
+            activeIndex = index;
+            const newActiveItem = iconRow.querySelectorAll('.icon-item')[activeIndex];
+            
+            newActiveItem.classList.add('active');
+            const neonColor = icons[activeIndex].neonColor;
+            newActiveItem.querySelector('img').style.boxShadow = `0 0 40px ${neonColor}`;
+            
+            updateDetailsPanel(activeIndex);
+        }
+        
+        // **********************************************
+        // تابع مدیریت نوار پیشرفت Goldhen
+        // **********************************************
+        function startGoldhenProcess(url) {
+            const overlay = document.getElementById('goldhen-progress-overlay');
+            const progressBar = document.getElementById('progress-bar');
+            const progressStatus = document.getElementById('progress-status');
+            
+            overlay.classList.add('show');
+            document.querySelector('.top-bar').style.opacity = '0';
+            document.querySelector('.bottom-bar').style.opacity = '0';
+            document.getElementById('icon-row').style.opacity = '0';
+            document.getElementById('details-panel').style.opacity = '0';
+            
+            progressStatus.innerText = "Connecting to the server...";
+            progressBar.style.width = '0%';
+            progressBar.style.transition = 'none';
+            
+            setTimeout(() => {
+                progressBar.style.transition = 'width 3s ease-in-out'; 
+                progressBar.style.width = '100%';
+            }, 100);
+
+            setTimeout(() => {
+                progressStatus.innerText = "Connect successfully";
+            }, 3100);
+
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                window.location.href = url;
+                
+                isAnimating = false;
+                document.querySelector('.top-bar').style.opacity = '1';
+                document.querySelector('.bottom-bar').style.opacity = '1';
+                document.getElementById('icon-row').style.opacity = '1';
+                document.getElementById('details-panel').style.opacity = '1';
+
+            }, 3500); 
+        }
+        // **********************************************
+
+        function navigateToActiveIcon() {
+            const activeUrl = icons[activeIndex].url;
+            if (!activeUrl) return;
+
+            if (isAnimating) return;
+            isAnimating = true; 
+
+            const body = document.body;
+            const activeIconName = icons[activeIndex].name;
+            const iconItems = iconRow.querySelectorAll('.icon-item');
+
+            if (activeIconName === "Goldhen") {
+                startGoldhenProcess(activeUrl); 
+                return;
+            }
+            
+            const itemAnimationDuration = 400; 
+            const itemDelay = 100; 
+            const totalAnimationTime = (iconItems.length * itemDelay) + itemAnimationDuration;
+
+            // ۱. شروع انیمیشن خروج تک به تک آیکون‌ها
+            iconItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('icon-exit'); 
+                }, index * itemDelay);
+            });
+
+            // ۲. محو کردن سریع جزئیات (نوارها و پنل) با یک کلاس
+            body.classList.add('transition-out');
+            
+            // ۳. ناوبری نهایی پس از اتمام انیمیشن آخرین آیتم
+            setTimeout(() => {
+                exitOverlay.classList.add('show');
+
+                window.location.href = activeUrl;
+                
+                isAnimating = false;
+            }, totalAnimationTime + 50); 
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (isAnimating) return;
+            
+            if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                activeIndex = (activeIndex + 1) % icons.length;
+                selectIcon(activeIndex);
+            } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                activeIndex = (activeIndex - 1 + icons.length) % icons.length;
+                selectIcon(activeIndex);
+            } 
+            else if (e.key === "Enter" || e.key === " ") {
+                navigateToActiveIcon(); 
+            }
+        });
+
+        function updateTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('current-time').innerText = `${hours}:${minutes}`;
+        }
+        
+        window.onload = function() {
+            
+            // --- ثبت Service Worker برای کش آفلاین ---
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('SW registration successful: ', registration.scope);
+                }, err => {
+                    console.log('SW registration failed: ', err);
+                });
+            }
+            // ------------------------------------------
+
+            renderIcons();
+            setInterval(updateTime, 60000);
+            updateTime();
+        };
+
+        // --- کد مهم برای حل مشکل "بک زدن" (احساس حضور کاربر) ---
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                isAnimating = false;
+                document.body.classList.remove('transition-out');
+                
+                document.getElementById('exit-overlay').classList.remove('show');
+                
+                document.querySelector('.top-bar').style.opacity = '1';
+                document.querySelector('.bottom-bar').style.opacity = '1';
+                document.getElementById('icon-row').style.opacity = '1';
+                document.getElementById('details-panel').style.opacity = '1';
+
+                renderIcons(); 
+            }
+        });
+        // ------------------------------------------
+    </script>
+</body>
+</html>
