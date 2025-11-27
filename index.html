@@ -94,6 +94,12 @@
     opacity:.88;
   }
 
+  .footer-info{
+    margin-top: 26px;
+    font-size: 18px;
+    color: #cfe1ff;
+  }
+
   #cache-status{
     position:fixed;
     bottom:6px;
@@ -104,7 +110,6 @@
     z-index:9999;
     display:none;
   }
-
 </style>
 </head>
 
@@ -120,36 +125,39 @@
 
 <div class="menu" id="menu">
 
-  <div class="item" data-name="PS4 Firmwares" data-url="https://darthsternie.net/ps4-firmwares/">
+  <div class="item" tabindex="0" data-name="PS4 Firmwares" data-url="https://darthsternie.net/ps4-firmwares/">
     <img src="find.png"><p>PS4 Firmwares</p>
   </div>
 
-  <div class="item" data-name="Goldhen" data-url="GoldHEN_v2.4b18.5.7z">
+  <div class="item" tabindex="0" data-name="Goldhen" data-url="GoldHEN_v2.4b18.5.7z">
     <img src="goldhen.png"><p>Goldhen</p>
   </div>
 
-  <div class="item" data-name="The wolf hack" data-url="https://wolf-5.github.io/900c/index.html">
+  <div class="item" tabindex="0" data-name="The wolf hack" data-url="https://wolf-5.github.io/900c/index.html">
     <img src="wolf_optimized.webp"><p>The wolf hack</p>
   </div>
 
-  <div class="item" data-name="Jailbreak Without USB" data-url="https://ps4idea.github.io/900/">
+  <div class="item" tabindex="0" data-name="Jailbreak Without USB" data-url="https://ps4idea.github.io/900/">
     <img src="no usb.webp"><p>Ps4 idea</p>
   </div>
 
-  <div class="item" data-name="Karo host fot jailbreak" data-url="https://karo218.ir/">
+  <div class="item" tabindex="0" data-name="Karo host fot jailbreak" data-url="https://karo218.ir/">
     <img src="karo.webp"><p>Karo host</p>
   </div>
 
-  <div class="item" data-name="Read before use" data-url="lean more.html">
+  <div class="item" tabindex="0" data-name="Read before use" data-url="lean more.html">
     <img src="Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp"><p>Read before use</p>
   </div>
 
 </div>
 
+<div class="footer-info">Selected: <span id="selected">PS4 Firmwares</span></div>
+
 <div id="cache-status">Installing offline cache… 0%</div>
 
 <script>
   const items=[...document.querySelectorAll('.item')];
+  const selected=document.getElementById("selected");
   let index=0;
 
   function updateSelection(i){
@@ -159,6 +167,7 @@
     items.forEach((it,idx)=>{
       it.classList.toggle('selected',idx===i);
       if(idx===i){
+        selected.textContent = it.dataset.name;
         if(document.activeElement!==it) it.focus({preventScroll:true});
       }
     });
@@ -180,6 +189,7 @@
   document.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight'){ e.preventDefault(); updateSelection((index+1)%items.length); }
     else if(e.key==='ArrowLeft'){ e.preventDefault(); updateSelection((index-1+items.length)%items.length); }
+    else if(e.key==='Enter'){ items[index].click(); }
   });
 </script>
 
@@ -195,7 +205,7 @@ if('serviceWorker' in navigator){
       el.textContent = "Installing offline cache… " + e.data.percent + "%";
 
       if(e.data.percent >= 100){
-        setTimeout(()=> el.style.display = "none", 1000);
+        setTimeout(()=> el.style.display = "none", 800);
       }
     }
   });
@@ -205,6 +215,8 @@ if('serviceWorker' in navigator){
 
 </body>
 </html>
+
+
 
 
 
