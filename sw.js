@@ -12,7 +12,6 @@ const FILES_TO_CACHE = [
   "ps4-luminous-wave-0xd36pumgigbl01x.jpg"
 ];
 
-// ارسال درصد پیشرفت به صفحه
 function sendStatus(msg){
   self.clients.matchAll().then(clients=>{
     clients.forEach(c=>c.postMessage(msg));
@@ -53,6 +52,8 @@ self.addEventListener("fetch", event => {
     caches.match(event.request).then(r => r || fetch(event.request))
   );
 });
+
+
 
 
 
