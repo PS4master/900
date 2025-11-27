@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی آفلاین T-Rex Runner</title>
+    <!-- Tailwind CSS CDN for modern UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the game and UI */
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f1f5f9; /* Light background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: white;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 300px; /* Fixed canvas height */
+            background-color: #f7f7f7;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        /* Menu button animation */
+        .menu-icon {
+            cursor: pointer;
+            padding: 8px;
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        /* Sidebar transition style */
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .menu-item-btn {
+            background-color: #4f46e5;
+            color: white;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px #3730a3;
+            transform: scale(0.9); /* Start slightly smaller for animation */
+        }
+        
+        .menu-item-btn:hover {
+            background-color: #6366f1;
+            box-shadow: 0 2px #3730a3;
+            transform: scale(1.0);
+        }
+
+        .game-over-text {
+            color: #ef4444;
+            font-size: 2.5rem;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-shadow: 2px 2px #fff;
+        }
+
+        .restart-button {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #22c55e;
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px #15803d;
+            transition: background-color 0.2s;
+        }
+        .restart-button:hover {
+            background-color: #10b981;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div id="game-container" class="w-full relative">
+        <!-- Header and Menu Button -->
+        <header class="flex justify-between items-center p-4 bg-indigo-600 text-white rounded-t-xl shadow-lg relative z-20">
+            <h1 class="text-xl sm:text-2xl font-bold">بازی فرار (Runner Game)</h1>
+            <div id="menu-icon" class="menu-icon p-2 bg-indigo-700 hover:bg-indigo-800 rounded-full shadow-md" onclick="toggleMenu()">
+                <!-- Hamburger Icon (Menu) -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-7 h-7">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+            </div>
+        </header>
+
+        <!-- Sidebar Menu (The Drawer) -->
+        <div id="sidebar" class="fixed top-0 left-0 h-full w-full sm:w-80 bg-gray-900/90 backdrop-blur-sm z-30 transform translate-x-full" style="direction: ltr;">
+            <div class="p-6 h-full flex flex-col items-end pt-20">
+                <!-- Close Button (X icon) -->
+                <button class="absolute top-4 right-4 text-white text-3xl hover:text-indigo-400 transition" onclick="toggleMenu()">
+                    &times;
+                </button>
+
+                <h2 class="text-2xl font-bold text-white mb-8 text-right w-full">انتخاب بازی</h2>
+
+                <!-- T-Rex Game Button -->
+                <button id="btn-dino" class="menu-item-btn w-3/4 animate-item-1" style="animation-delay: 0.1s;" onclick="switchGame('dino')">
+                    🦖 بازی اصلی تی‌رکس
+                </button>
+
+                <!-- Santa Game Button -->
+                <button id="btn-santa" class="menu-item-btn w-3/4 animate-item-2" style="animation-delay: 0.2s;" onclick="switchGame('santa')">
+                    🎅 بازی با تم بابانوئل
+                </button>
+                
+                <p class="text-xs text-gray-400 mt-auto text-center w-full">کلیک کنید یا Space را برای پرش بزنید</p>
+            </div>
+        </div>
+
+        <!-- Game Area and Canvas -->
+        <div id="canvas-wrapper" class="relative w-full overflow-hidden" style="height: 300px;">
+            <canvas id="gameCanvas"></canvas>
+            <div id="game-ui" class="absolute inset-0 pointer-events-none flex flex-col justify-center items-center p-4 z-10">
+                <div id="scoreDisplay" class="text-xl font-bold text-gray-700 absolute top-4 left-4 pointer-events-auto bg-white/70 px-3 py-1 rounded-lg shadow">
+                    امتیاز: 0
+                </div>
+                <div id="messageBox" class="text-center">
+                    <p id="gameOverText" class="game-over-text hidden">بازی تمام شد!</p>
+                    <button id="restartButton" class="restart-button hidden pointer-events-auto" onclick="restartGame()">شروع مجدد</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import necessary Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Setup (Boilerplate for Canvas Environment) ---
+        let db, auth, userId, appId;
+        
+        setLogLevel('error'); // Set log level to reduce console noise
+
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        if (Object.keys(firebaseConfig).length > 0) {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            
+            // Authentication function
+            async function authenticate() {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Firebase Auth Error:", error);
+                }
+            }
+
+            // Listen for auth state change
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("Authenticated with user ID:", userId);
+                    // You would start persistence features here if needed.
+                } else {
+                    // Sign in if not already signed in
+                    authenticate();
+                }
+            });
+        }
+        // --- END Firebase Setup ---
+
+        // --- Game Setup and Logic ---
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const gameOverText = document.getElementById('gameOverText');
+        const restartButton = document.getElementById('restartButton');
+        const canvasWrapper = document.getElementById('canvas-wrapper');
+
+        let gameLoopId;
+        let isRunning = false;
+        let score = 0;
+        let speed = 5;
+        let highScore = 0;
+
+        // Configuration for different themes
+        const THEMES = {
+            dino: {
+                playerColor: '#2563eb', // Blue Dino
+                obstacleColor: '#059669', // Green Cactus
+                groundColor: '#4f46e5',
+                bgColor: '#f7f7f7',
+                playerName: 'تی‌رکس',
+                playerShape: (ctx, x, y, w, h) => {
+                    // Simple T-Rex shape (rectangle with a small head/tail hint)
+                    ctx.fillRect(x, y, w, h);
+                    ctx.beginPath();
+                    ctx.arc(x + w, y, h / 3, 0, Math.PI * 2); // Head
+                    ctx.fill();
+                },
+                obstacleShape: (ctx, x, y, w, h) => {
+                    // Simple Cactus shape
+                    ctx.fillRect(x, y, w, h);
+                    ctx.fillRect(x - w / 2, y + h / 4, w * 2, h / 4);
+                }
+            },
+            santa: {
+                playerColor: '#ef4444', // Red Santa
+                obstacleColor: '#10b981', // Christmas Tree Green
+                groundColor: '#be123c',
+                bgColor: '#f0f9ff',
+                playerName: 'بابانوئل',
+                playerShape: (ctx, x, y, w, h) => {
+                    // Simple Santa shape (red body, white head)
+                    // Body (Red)
+                    ctx.fillStyle = '#ef4444'; 
+                    ctx.fillRect(x, y, w, h);
+                    // Hat (White trim)
+                    ctx.fillStyle = '#f9fafb'; 
+                    ctx.fillRect(x, y, w, h / 5);
+                    ctx.beginPath();
+                    ctx.arc(x + w, y, h / 4, 0, Math.PI * 2); // Head/beard hint
+                    ctx.fill();
+                },
+                obstacleShape: (ctx, x, y, w, h) => {
+                    // Simple Christmas Tree shape
+                    ctx.beginPath();
+                    ctx.moveTo(x + w / 2, y);
+                    ctx.lineTo(x, y + h);
+                    ctx.lineTo(x + w, y + h);
+                    ctx.closePath();
+                    ctx.fill();
+                    // Trunk (Brown)
+                    ctx.fillStyle = '#995000';
+                    ctx.fillRect(x + w/2 - 2, y + h - 5, 4, 5);
+                }
+            }
+        };
+
+        let currentTheme = THEMES.dino;
+
+        // Player (Dino/Santa) Class
+        class Player {
+            constructor() {
+                this.width = 40;
+                this.height = 60;
+                this.x = 50;
+                this.y = 0;
+                this.vy = 0; // vertical velocity
+                this.gravity = 0.6;
+                this.isJumping = false;
+                this.groundY = canvas.height - 60;
+            }
+
+            draw() {
+                ctx.fillStyle = currentTheme.playerColor;
+                currentTheme.playerShape(ctx, this.x, this.y, this.width, this.height);
+            }
+
+            update() {
+                // Apply gravity
+                if (this.isJumping || this.y < this.groundY) {
+                    this.vy += this.gravity;
+                    this.y += this.vy;
+                }
+
+                // Check for landing
+                if (this.y >= this.groundY) {
+                    this.y = this.groundY;
+                    this.isJumping = false;
+                    this.vy = 0;
+                }
+            }
+
+            jump() {
+                if (!this.isJumping) {
+                    this.isJumping = true;
+                    this.vy = -12; // Initial jump velocity
+                }
+            }
+        }
+
+        // Obstacle Class
+        class Obstacle {
+            constructor(type) {
+                this.width = 20 + Math.random() * 20; // Random width
+                this.height = 30 + Math.random() * 40; // Random height
+                this.x = canvas.width;
+                this.y = canvas.height - this.height - 60; // Adjusted for ground line
+            }
+
+            draw() {
+                ctx.fillStyle = currentTheme.obstacleColor;
+                currentTheme.obstacleShape(ctx, this.x, this.y, this.width, this.height);
+            }
+
+            update() {
+                this.x -= speed;
+            }
+
+            // Simple Axis-Aligned Bounding Box (AABB) collision detection
+            checkCollision(player) {
+                // Check if the two objects overlap in the x and y dimensions
+                const x_overlap = this.x < player.x + player.width && this.x + this.width > player.x;
+                const y_overlap = this.y < player.y + player.height && this.y + this.height > player.y;
+                return x_overlap && y_overlap;
+            }
+        }
+
+        let player;
+        let obstacles = [];
+        let obstacleTimer = 0;
+        let obstacleInterval = 100; // base interval for spawning
+
+        // Initialize game elements
+        function initGame() {
+            // Ensure canvas size is set based on container
+            canvas.width = canvasWrapper.clientWidth;
+            canvas.height = canvasWrapper.clientHeight;
+            
+            player = new Player();
+            obstacles = [];
+            score = 0;
+            speed = 5;
+            obstacleTimer = 0;
+            isRunning = true;
+            
+            gameOverText.classList.add('hidden');
+            restartButton.classList.add('hidden');
+            updateScoreDisplay();
+        }
+
+        // Main game loop
+        function gameLoop() {
+            if (!isRunning) return;
+
+            // Update game logic
+            update();
+            // Draw all elements
+            draw();
+
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            // 1. Update Score and Speed
+            score++;
+            // Slowly increase speed over time
+            if (score % 500 === 0) {
+                speed += 0.5;
+            }
+            updateScoreDisplay();
+
+            // 2. Player Update
+            player.update();
+
+            // 3. Obstacle Management
+            obstacleTimer++;
+            // Calculate dynamic interval based on speed
+            const currentInterval = Math.max(70, 150 - speed * 5); 
+
+            if (obstacleTimer > currentInterval) {
+                obstacles.push(new Obstacle());
+                obstacleTimer = 0;
+            }
+
+            // Move and check collisions for obstacles
+            for (let i = 0; i < obstacles.length; i++) {
+                const obs = obstacles[i];
+                obs.update();
+
+                if (obs.checkCollision(player)) {
+                    gameOver();
+                    return;
+                }
+            }
+
+            // Remove off-screen obstacles
+            obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
+        }
+
+        function draw() {
+            // Clear the canvas
+            ctx.fillStyle = currentTheme.bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Ground Line
+            ctx.fillStyle = currentTheme.groundColor;
+            ctx.fillRect(0, canvas.height - 60, canvas.width, 5);
+
+            // Draw player
+            player.draw();
+
+            // Draw obstacles
+            obstacles.forEach(obs => obs.draw());
+        }
+
+        function gameOver() {
+            isRunning = false;
+            cancelAnimationFrame(gameLoopId);
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('highScore', highScore);
+            }
+
+            gameOverText.classList.remove('hidden');
+            restartButton.classList.remove('hidden');
+            
+            // Final score display on game over
+            ctx.fillStyle = '#000';
+            ctx.font = '20px Vazirmatn';
+            ctx.textAlign = 'center';
+            ctx.fillText(`امتیاز شما: ${Math.floor(score / 10)}`, canvas.width / 2, canvas.height / 2 + 50);
+        }
+
+        function restartGame() {
+            initGame();
+            gameLoop();
+        }
+
+        function updateScoreDisplay() {
+            const currentScore = Math.floor(score / 10);
+            scoreDisplay.innerHTML = `امتیاز: ${currentScore}<br>بالاترین: ${highScore}`;
+        }
+
+        // Handle user input
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.key === ' ' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!isRunning) {
+                    restartGame();
+                } else {
+                    player.jump();
+                }
+            }
+        });
+        
+        // Handle touch input for mobile
+        canvas.addEventListener('click', (e) => {
+            if (!isRunning) {
+                restartGame();
+            } else {
+                player.jump();
+            }
+        });
+        
+        // Handle window resize for responsiveness
+        window.addEventListener('resize', () => {
+            if (!isRunning) {
+                canvas.width = canvasWrapper.clientWidth;
+                canvas.height = canvasWrapper.clientHeight;
+                // Redraw initial state if not running
+                ctx.fillStyle = currentTheme.bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = currentTheme.groundColor;
+                ctx.fillRect(0, canvas.height - 60, canvas.width, 5);
+                updateScoreDisplay();
+            } else {
+                // If running, the game loop handles the size, but we need to re-init dimensions
+                canvas.width = canvasWrapper.clientWidth;
+                canvas.height = canvasWrapper.clientHeight;
+                player.groundY = canvas.height - 60; // Recalculate ground position
+            }
+        });
+
+        // Initialize the game on load with high score
+        highScore = parseInt(localStorage.getItem('highScore') || '0');
+        initGame();
+        
+        // --- UI Logic ---
+        const sidebar = document.getElementById('sidebar');
+
+        window.toggleMenu = function() {
+            if (sidebar.classList.contains('translate-x-full')) {
+                // Open menu
+                sidebar.classList.remove('translate-x-full');
+            } else {
+                // Close menu
+                sidebar.classList.add('translate-x-full');
+            }
+        }
+        
+        window.switchGame = function(themeName) {
+            currentTheme = THEMES[themeName];
+            localStorage.setItem('lastTheme', themeName); // Save preference
+            toggleMenu(); // Close menu
+            restartGame(); // Start the new themed game
+        }
+        
+        // Load last theme preference
+        const lastTheme = localStorage.getItem('lastTheme') || 'dino';
+        currentTheme = THEMES[lastTheme];
+        
+        // Start the game loop only after all setup is done
+        window.onload = function() {
+            // A small delay to ensure canvas size is correct after initial render
+            setTimeout(() => {
+                initGame();
+                gameLoop();
+            }, 100);
+        }
+
+    </script>
+</body>
+</html>
