@@ -1,7 +1,6 @@
-const CACHE_NAME = "ps4host-v2";
+const CACHE_NAME = "ps4-cache-v3";  // 🔥 نسخه جدید
 
-const FILES_TO_CACHE = [
-  "./",
+const FILES = [
   "index.html",
   "find.png",
   "goldhen.png",
@@ -12,37 +11,58 @@ const FILES_TO_CACHE = [
   "ps4-luminous-wave-0xd36pumgigbl01x.jpg"
 ];
 
-// نصب Service Worker و کش کردن فایل‌ها
+// -------------------------
+// INSTALL (PS4-safe)
+// -------------------------
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(FILES_TO_CACHE);
-    })
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+
+      // کش کردن فایل‌ها یکی‌یکی تا PS4 کرش نکنه
+      for (const file of FILES) {
+        try {
+          const res = await fetch(file, { cache: "no-store" });
+          if (res.ok) await cache.put(file, res.clone());
+        } catch (err) {
+          console.log("PS4 Cache skip:", file);
+        }
+      }
+
+      self.skipWaiting();
+    })()
   );
-  self.skipWaiting();
 });
 
-// فعال‌سازی
+// -------------------------
+// ACTIVATE (پاک کردن نسخه‌های قدیمی)
+// -------------------------
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
-        keys.map(k => {
-          if(k !== CACHE_NAME){
-            return caches.delete(k);
-          }
-        })
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       );
     })
   );
+
   self.clients.claim();
 });
 
-// واکشی فایل‌ها (اول کش، بعد اینترنت)
+// -------------------------
+// FETCH (cache-first)
+// -------------------------
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(res => {
-      return res || fetch(event.request);
+    caches.match(event.request).then(cached => {
+      return (
+        cached ||
+        fetch(event.request).catch(() => cached)
+      );
     })
   );
 });
+
+
