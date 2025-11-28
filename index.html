@@ -11,7 +11,6 @@
     --card-radius: 14px;
     --transition: 140ms;
   }
-
   *{box-sizing: border-box;}
   html,body{height:100%; margin:0; padding:0;}
 
@@ -20,7 +19,7 @@
     color: #fff;
     font-family: "Segoe UI", Tahoma, system-ui, sans-serif;
     text-align: center;
-    background-image: url('ps4_wave_purple_compressed.jpg');
+    background-image: url('/900/ps4_wave_purple_compressed.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -34,7 +33,6 @@
     align-items: center;
     padding: 12px 18px;
     font-weight: 700;
-    letter-spacing: .6px;
     background: rgba(11,14,29,0.92);
     z-index: 40;
     border-radius: 0 0 18px 18px;
@@ -49,18 +47,16 @@
     font-size: 22px;
     color: #cfe1ff;
     font-weight: 600;
-    z-index: 9990;
   }
 
 .menu{
   display:flex;
   justify-content:center;
   gap:28px;
-  margin:36px auto;
+  margin-top: 140px;
   max-width:980px;
   padding:18px;
   flex-wrap:wrap;
-  margin-top: 140px;
 }
 
   .item{
@@ -73,7 +69,7 @@
     flex-direction:column;
     align-items:center;
     gap:8px;
-    transition:transform var(--transition),opacity var(--transition),box-shadow var(--transition);
+    transition:var(--transition);
   }
 
   .item img{
@@ -86,29 +82,7 @@
   }
 
   .item p{ margin:0; font-size:13px; color:#d8e3ff; }
-
-  .item:hover,
-  .item.selected{
-    transform:translateY(-6px) scale(1.06);
-    box-shadow:0 8px 14px rgba(0,0,0,0.35);
-    z-index:20;
-  }
-
-  .menu:hover .item:not(:hover):not(.selected){
-    transform:scale(0.96);
-    opacity:.88;
-  }
-
-  #cache-status{
-    position:fixed;
-    bottom:6px;
-    left:50%;
-    transform:translateX(-50%);
-    color:#ffffffb0;
-    font-size:12px;
-    z-index:9999;
-    display:none;
-  }
+  .item:hover,.item.selected{ transform:translateY(-6px) scale(1.06); }
 </style>
 </head>
 
@@ -116,99 +90,104 @@
 
 <div class="top-bar">
   <span>jailbreak 9.00 version</span>
-  <span>Made it by ARSHIA</span>
+  <span>Made by ARSHIA</span>
   <span>offline cache enabled</span>
 </div>
 
 <div class="footer-info">Selected: <span id="selected">PS4 Firmwares</span></div>
 
 <div class="menu" id="menu">
-
-  <div class="item" tabindex="0" data-name="PS4 Firmwares" data-url="https://darthsternie.net/ps4-firmwares/">
-    <img src="find.png"><p>PS4 Firmwares</p>
+  <div class="item" data-name="PS4 Firmwares" data-url="https://darthsternie.net/ps4-firmwares/">
+    <img src="/900/find.png"><p>PS4 Firmwares</p>
   </div>
 
-  <div class="item" tabindex="0" data-name="Goldhen" data-url="GoldHEN_v2.4b18.5.7z">
-    <img src="goldhen.png"><p>Goldhen</p>
+  <div class="item" data-name="Goldhen" data-url="/900/GoldHEN_v2.4b18.5.7z">
+    <img src="/900/goldhen.png"><p>Goldhen</p>
   </div>
 
-  <div class="item" tabindex="0" data-name="The wolf hack" data-url="https://wolf-5.github.io/900c/index.html">
-    <img src="wolf_optimized.webp"><p>The wolf hack</p>
+  <div class="item" data-name="The wolf hack" data-url="https://wolf-5.github.io/900c/index.html">
+    <img src="/900/wolf_optimized.webp"><p>The wolf hack</p>
   </div>
 
-  <div class="item" tabindex="0" data-name="Jailbreak Without USB" data-url="https://ps4idea.github.io/900/">
-    <img src="no usb.webp"><p>Ps4 idea</p>
+  <div class="item" data-name="Ps4 idea" data-url="https://ps4idea.github.io/900/">
+    <img src="/900/no usb.webp"><p>Ps4 idea</p>
   </div>
 
-  <div class="item" tabindex="0" data-name="Karo host for jailbreak" data-url="https://karo218.ir/">
-    <img src="karo.webp"><p>Karo host</p>
+  <div class="item" data-name="Karo host" data-url="https://karo218.ir/">
+    <img src="/900/karo.webp"><p>Karo host</p>
   </div>
 
-  <div class="item" tabindex="0" data-name="Read before use" data-url="lean more.html">
-    <img src="Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp"><p>Read before use</p>
+  <div class="item" data-name="Read before use" data-url="/900/lean more.html">
+    <img src="/900/Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp"><p>Read before use</p>
   </div>
-
 </div>
 
-<div id="cache-status">Installing offline cache… 0%</div>
-
 <script>
-  const items=[...document.querySelectorAll('.item')];
-  const selected=document.getElementById("selected");
-  let index=0;
+const items=[...document.querySelectorAll('.item')];
+const selected=document.getElementById("selected");
+let index=0;
 
-  function updateSelection(i){
-    if(i<0)i=0;
-    if(i>=items.length)i=items.length-1;
-
-    items.forEach((it,idx)=>{
-      it.classList.toggle('selected',idx===i);
-      if(idx===i){
-        selected.textContent = it.dataset.name;
-        if(document.activeElement!==it) it.focus({preventScroll:true});
-      }
-    });
-
-    index=i;
-  }
-
-  updateSelection(0);
-
-  items.forEach((item,i)=>{
-    item.addEventListener('mouseover',()=>updateSelection(i));
-    item.addEventListener('focus',()=>updateSelection(i));
-    item.addEventListener('click',()=>{
-      const url=item.dataset.url;
-      if(url) location.href = url;
-    });
+function updateSelection(i){
+  items.forEach((it,idx)=>{
+    it.classList.toggle('selected',idx===i);
+    if(idx===i) selected.textContent = it.dataset.name;
   });
+  index=i;
+}
 
-  document.addEventListener('keydown',e=>{
-    if(e.key==='ArrowRight'){ e.preventDefault(); updateSelection((index+1)%items.length); }
-    else if(e.key==='ArrowLeft'){ e.preventDefault(); updateSelection((index-1+items.length)%items.length); }
-    else if(e.key==='Enter'){ items[index].click(); }
+updateSelection(0);
+
+items.forEach((item,i)=>{
+  item.addEventListener('click',()=>{
+    location.href = item.dataset.url;
   });
+});
 </script>
 
-<!-- 🔥🔥🔥 سرویس ورکر مخصوص PS4 + نسخه کامل برای دستگاه‌های دیگر -->
+<!-- 🔥 ثبت Service Worker -->
 <script>
 if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/900/sw.js')
+    .then(() => console.log("✔ SW registered"))
+    .catch(err => console.error("❌ SW error:", err));
+}
+</script>
 
-  const isPS4 = navigator.userAgent.includes("PlayStation");
+<!-- 🔥 اسکریپت تشخیص مشکل‌ها -->
+<script>
+(async () => {
 
-  if (isPS4) {
-      console.log("PS4 detected → using PS4 SW v3");
-      navigator.serviceWorker.register('sw-ps4.js');
-  } else {
-      console.log("Normal device → using full SW");
-      navigator.serviceWorker.register('sw.js');
+  console.log("========== DIAGNOSTIC ==========");
+
+  const base = "/900/";
+
+  async function testFile(file) {
+    try {
+      const res = await fetch(base + file + "?t=" + Date.now());
+      if (res.ok) console.log("✔", file);
+      else console.error("❌", file, res.status);
+    } catch (err) {
+      console.error("❌", file, err);
+    }
   }
 
-}
+  const files = [
+    "index.html",
+    "find.png",
+    "goldhen.png",
+    "wolf_optimized.webp",
+    "no usb.webp",
+    "karo.webp",
+    "Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp",
+    "ps4-luminous-wave-0xd36pumgigbl01x.jpg"
+  ];
+
+  for (let f of files) await testFile(f);
+
+  console.log("========== END ==========");
+
+})();
 </script>
 
 </body>
 </html>
-
-
-
