@@ -41,7 +41,6 @@
     box-shadow: 0 5px 12px rgba(0,0,0,0.35);
   }
 
-  /* 🔥 Selected جای h1 قبلی */
   .footer-info {
     position: fixed;
     top: 95px;
@@ -53,8 +52,6 @@
     z-index: 9990;
   }
 
-  /* تا منو نره بالا */
- 
 .menu{
   display:flex;
   justify-content:center;
@@ -63,9 +60,8 @@
   max-width:980px;
   padding:18px;
   flex-wrap:wrap;
-  margin-top: 140px; /* فاصله دقیق برای اینکه Selected بالا باشه و منو وسط سایت بمونه */
+  margin-top: 140px;
 }
-
 
   .item{
     width:110px;
@@ -124,7 +120,6 @@
   <span>offline cache enabled</span>
 </div>
 
-<!-- 🔥 Selected آمده جای h1 -->
 <div class="footer-info">Selected: <span id="selected">PS4 Firmwares</span></div>
 
 <div class="menu" id="menu">
@@ -184,7 +179,7 @@
     item.addEventListener('focus',()=>updateSelection(i));
     item.addEventListener('click',()=>{
       const url=item.dataset.url;
-      if(url) window.open(url,'_blank');
+      if(url) location.href = url;
     });
   });
 
@@ -195,26 +190,25 @@
   });
 </script>
 
+<!-- 🔥🔥🔥 سرویس ورکر مخصوص PS4 + نسخه کامل برای دستگاه‌های دیگر -->
 <script>
-if('serviceWorker' in navigator){
+if ('serviceWorker' in navigator) {
 
-  navigator.serviceWorker.register('sw.js');
+  const isPS4 = navigator.userAgent.includes("PlayStation");
 
-  navigator.serviceWorker.addEventListener("message", e=>{
-    if(e.data?.type === "CACHE_PROGRESS"){
-      const el = document.getElementById("cache-status");
-      el.style.display = "block";
-      el.textContent = "Installing offline cache… " + e.data.percent + "%";
-
-      if(e.data.percent >= 100){
-        setTimeout(()=> el.style.display = "none", 800);
-      }
-    }
-  });
+  if (isPS4) {
+      console.log("PS4 detected → using PS4 SW v3");
+      navigator.serviceWorker.register('sw-ps4.js');
+  } else {
+      console.log("Normal device → using full SW");
+      navigator.serviceWorker.register('sw.js');
+  }
 
 }
 </script>
 
 </body>
 </html>
+
+
 
