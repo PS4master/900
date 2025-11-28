@@ -1,7 +1,5 @@
-const CACHE_NAME = "ps4host-v3";
+const CACHE_NAME = "ps4host-v4";  // نسخه جدید
 
-// ⚠️ مسیر کامل فایل‌ها  
-// چون سایتت در مسیر /900/ هست، باید همه فایل‌ها با /900/... شروع بشن
 const FILES_TO_CACHE = [
   "/900/",
   "/900/index.html",
@@ -11,12 +9,10 @@ const FILES_TO_CACHE = [
   "/900/no usb.webp",
   "/900/karo.webp",
   "/900/Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp",
-  "/900/ps4_wave_purple_compressed.jpg"
+  "/900/ps4-luminous-wave-0xd36pumgigbl01x.jpg"
 ];
 
-// ------------------------------
-// INSTALL → تکی تکی کش بشه (سازگار با PS4)
-// ------------------------------
+// ========== INSTALL ==========
 self.addEventListener("install", event => {
   event.waitUntil(
     (async () => {
@@ -25,46 +21,37 @@ self.addEventListener("install", event => {
       for (const file of FILES_TO_CACHE) {
         try {
           const res = await fetch(file, { cache: "no-store" });
-          if (res.ok) {
-            await cache.put(file, res.clone());
-          } else {
-            console.warn("Skip (not ok):", file);
-          }
-        } catch (err) {
-          console.warn("Skip (error):", file);
+          if (res.ok) await cache.put(file, res.clone());
+        } catch (e) {
+          console.warn("Skip:", file);
         }
       }
 
-      self.skipWaiting();
+      // نسخه جدید را *اجباری* فعال می‌کند
+      await self.skipWaiting();
     })()
   );
 });
 
-// ------------------------------
-// ACTIVATE → پاک کردن کش قدیمی
-// ------------------------------
+// ========== ACTIVATE ==========
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys
           .filter(k => k !== CACHE_NAME)
-          .map(k => caches.delete(k))
+          .map(k => caches.delete(k)) // پاک کردن کامل ورژن‌های قبلی
       );
     })
   );
   self.clients.claim();
 });
 
-// ------------------------------
-// FETCH → cache-first
-// ------------------------------
+// ========== FETCH ==========
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(cached => {
-      return cached ||
-        fetch(event.request).catch(() => cached);
+      return cached || fetch(event.request).catch(() => cached);
     })
   );
 });
-
