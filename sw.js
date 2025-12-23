@@ -1,57 +1,56 @@
-const CACHE_NAME = "ps4host-v4";  // نسخه جدید
+const CACHE_NAME = "ps4master-final-v10";
 
-const FILES_TO_CACHE = [
-  "/900/",
-  "/900/index.html",
-  "/900/find.png",
-  "/900/goldhen.png",
-  "/900/wolf_optimized.webp",
-  "/900/no usb.webp",
-  "/900/karo.webp",
-  "/900/Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp",
-  "/900/ps4-luminous-wave-0xd36pumgigbl01x.jpg"
+const FILES = [
+  "./",
+  "index.html",
+  "find.png",
+  "goldhen.png",
+  "wolf_optimized.webp",
+  "no usb.webp",
+  "karo.webp",
+  "Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp",
+  "ps4_wave_purple_compressed.jpg",
+  "int64.js",
+  "rop.js",
+  "kexploit.js",
+  "exploit.js"
 ];
 
-// ========== INSTALL ==========
 self.addEventListener("install", event => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
+      let totalFiles = FILES.length;
+      let downloaded = 0;
 
-      for (const file of FILES_TO_CACHE) {
+      for (const file of FILES) {
         try {
           const res = await fetch(file, { cache: "no-store" });
-          if (res.ok) await cache.put(file, res.clone());
-        } catch (e) {
-          console.warn("Skip:", file);
-        }
+          if (res.ok) {
+            await cache.put(file, res.clone());
+            downloaded++;
+            const percent = Math.round((downloaded / totalFiles) * 100);
+            const clients = await self.clients.matchAll();
+            clients.forEach(client => client.postMessage({ type: 'PROGRESS', percent }));
+          }
+        } catch (err) { console.log("Skip:", file); }
       }
-
-      // نسخه جدید را *اجباری* فعال می‌کند
-      await self.skipWaiting();
+      self.skipWaiting();
     })()
   );
 });
 
-// ========== ACTIVATE ==========
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys
-          .filter(k => k !== CACHE_NAME)
-          .map(k => caches.delete(k)) // پاک کردن کامل ورژن‌های قبلی
-      );
-    })
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+    ))
   );
   self.clients.claim();
 });
 
-// ========== FETCH ==========
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request).catch(() => cached);
-    })
+    caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });
