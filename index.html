@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PS4 Jailbreak - PS4Master</title>
+<title>PS4 jailbreaks</title>
 
 <style>
   :root{
@@ -50,18 +50,18 @@
     color: #cfe1ff;
     font-weight: 600;
     z-index: 9990;
-    width: 100%;
   }
 
-  .menu{
-    display:flex;
-    justify-content:center;
-    gap:28px;
-    margin:140px auto 36px auto;
-    max-width:980px;
-    padding:18px;
-    flex-wrap:wrap;
-  }
+.menu{
+  display:flex;
+  justify-content:center;
+  gap:28px;
+  margin:36px auto;
+  max-width:980px;
+  padding:18px;
+  flex-wrap:wrap;
+  margin-top: 140px;
+}
 
   .item{
     width:110px;
@@ -73,9 +73,7 @@
     flex-direction:column;
     align-items:center;
     gap:8px;
-    transition:transform var(--transition), opacity var(--transition);
-    outline: none;
-    border: none; /* بردر حذف شد */
+    transition:transform var(--transition),opacity var(--transition),box-shadow var(--transition);
   }
 
   .item img{
@@ -92,8 +90,24 @@
   .item:hover,
   .item.selected{
     transform:translateY(-6px) scale(1.06);
-    background:rgba(255,255,255,0.15);
+    box-shadow:0 8px 14px rgba(0,0,0,0.35);
     z-index:20;
+  }
+
+  .menu:hover .item:not(:hover):not(.selected){
+    transform:scale(0.96);
+    opacity:.88;
+  }
+
+  #cache-status{
+    position:fixed;
+    bottom:6px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#ffffffb0;
+    font-size:12px;
+    z-index:9999;
+    display:none;
   }
 </style>
 </head>
@@ -101,44 +115,47 @@
 <body>
 
 <div class="top-bar">
-  <span>PS4 Jailbreak 9.00</span>
-  <span>Made by ARSHIA</span>
-  <span>Offline Cache Enabled</span>
+  <span>jailbreak 9.00 version</span>
+  <span>Made it by ARSHIA</span>
+  <span>offline cache enabled</span>
 </div>
 
-<div class="footer-info">Selected: <span id="selected">jailbreak with ps4master site</span></div>
+<div class="footer-info">Selected: <span id="selected">PS4 Firmwares</span></div>
 
 <div class="menu" id="menu">
-  <div class="item" tabindex="0" data-name="Jailbreak" data-action="exploit">
-    <img src="find.png"><p>Jailbreak</p>
+
+  <div class="item" tabindex="0" data-name="PS4 Firmwares" data-url="https://darthsternie.net/ps4-firmwares/">
+    <img src="find.png"><p>PS4 Firmwares</p>
   </div>
-  <div class="item" tabindex="0" data-name="Goldhen" data-action="exploit">
+
+  <div class="item" tabindex="0" data-name="Goldhen" data-url="GoldHEN_v2.4b18.5.7z">
     <img src="goldhen.png"><p>Goldhen</p>
   </div>
-  <div class="item" tabindex="0" data-name="The Wolf Hack" data-url="https://wolf-5.github.io/900c/index.html">
-    <img src="wolf_optimized.webp"><p>The Wolf Hack</p>
+
+  <div class="item" tabindex="0" data-name="The wolf hack" data-url="https://wolf-5.github.io/900c/index.html">
+    <img src="wolf_optimized.webp"><p>The wolf hack</p>
   </div>
-  <div class="item" tabindex="0" data-name="Ps4 Idea" data-url="https://ps4idea.github.io/900/">
-    <img src="no usb.webp"><p>Ps4 Idea</p>
+
+  <div class="item" tabindex="0" data-name="Jailbreak Without USB" data-url="https://ps4idea.github.io/900/">
+    <img src="no usb.webp"><p>Ps4 idea</p>
   </div>
-  <div class="item" tabindex="0" data-name="Karo Host" data-url="https://karo218.ir/">
-    <img src="karo.webp"><p>Karo Host</p>
+
+  <div class="item" tabindex="0" data-name="Karo host for jailbreak" data-url="https://karo218.ir/">
+    <img src="karo.webp"><p>Karo host</p>
   </div>
-  <div class="item" tabindex="0" data-name="Read Before Use" data-url="lean more.html">
-    <img src="Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp"><p>Read Before Use</p>
+
+  <div class="item" tabindex="0" data-name="Read before use" data-url="lean more.html">
+    <img src="Gemini_Generated_Image_j8sn1j8sn1j8sn1j.webp"><p>Read before use</p>
   </div>
+
 </div>
 
-<script src="int64.js"></script>
-<script src="rop.js"></script>
-<script src="kexploit.js"></script>
-<script src="exploit.js"></script>
+<div id="cache-status">Installing offline cache… 0%</div>
 
 <script>
   const items=[...document.querySelectorAll('.item')];
-  const selectedText=document.getElementById("selected");
+  const selected=document.getElementById("selected");
   let index=0;
-  let isInteracted = false; 
 
   function updateSelection(i){
     if(i<0)i=0;
@@ -147,58 +164,53 @@
     items.forEach((it,idx)=>{
       it.classList.toggle('selected',idx===i);
       if(idx===i){
-        if(isInteracted) {
-          selectedText.textContent = it.dataset.name;
-        }
+        selected.textContent = it.dataset.name;
         if(document.activeElement!==it) it.focus({preventScroll:true});
       }
     });
+
     index=i;
   }
 
-  selectedText.textContent = "jailbreak with ps4master site";
+  updateSelection(0);
 
   items.forEach((item,i)=>{
-    item.addEventListener('mouseover',()=>{
-      isInteracted = true;
-      updateSelection(i);
-    });
+    item.addEventListener('mouseover',()=>updateSelection(i));
+    item.addEventListener('focus',()=>updateSelection(i));
     item.addEventListener('click',()=>{
-      isInteracted = true;
-      const action = item.dataset.action;
-      if(action === "exploit") {
-        selectedText.textContent = "Running Exploit... Please Wait";
-        if(typeof poc === "function") poc();
-      } else if(item.dataset.url) {
-        location.href = item.dataset.url;
-      }
+      const url=item.dataset.url;
+      if(url) location.href = url;
     });
   });
 
   document.addEventListener('keydown',e=>{
-    isInteracted = true;
     if(e.key==='ArrowRight'){ e.preventDefault(); updateSelection((index+1)%items.length); }
     else if(e.key==='ArrowLeft'){ e.preventDefault(); updateSelection((index-1+items.length)%items.length); }
     else if(e.key==='Enter'){ items[index].click(); }
   });
-
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').then(reg => {
-        navigator.serviceWorker.addEventListener('message', event => {
-          if (event.data.type === 'PROGRESS') {
-            selectedText.textContent = "Caching: " + event.data.percent + "%";
-            if (event.data.percent === 100) {
-              setTimeout(() => {
-                selectedText.textContent = "Offline Cache Ready! ✅";
-                setTimeout(() => { selectedText.textContent = "jailbreak with ps4master site"; }, 3000);
-              }, 1000);
-            }
-          }
-        });
-      });
-    });
-  }
 </script>
+
+<!-- 🔥🔥🔥 سرویس ورکر مخصوص PS4 + نسخه کامل برای دستگاه‌های دیگر -->
+<script>
+if ('serviceWorker' in navigator) {
+
+  const isPS4 = navigator.userAgent.includes("PlayStation");
+
+  if (isPS4) {
+      console.log("PS4 detected → using PS4 SW v3");
+      navigator.serviceWorker.register('/900/sw-ps4.js');
+  } else {
+      console.log("Normal device → using full SW");
+      navigator.serviceWorker.register('sw.js');
+  }
+
+}
+</script>
+
 </body>
 </html>
+
+
+
+
+
