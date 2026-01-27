@@ -1,2 +1,5 @@
-# 900
-🚧 PS4 Jailbreak UI - Under Active Development A redesigned interface for PS4 jailbreaking, built with pure HTML/CSS/JS. ## 🔗 Integrated Tools - **The Wolf Hack** - Primary exploit host - **PS4 Idea Jailbreak** - USB-less jailbreak method ## 📢 Important Notice We've created this new UI interface to enhance the jailbreak experience for.
+This project is a UX concept for switching between different commonly used hosting options.
+you cna jailbreak firmware (9.00) 
+It is designed to let users easily choose and switch between various hosting types based on their needs.
+The project is still a work in progress, and improvements to the user experience and details will be added over time.
+Thanks for checking it out.
