@@ -12,7 +12,6 @@
     --transition: 140ms;
   }
 
-  *{box-sizing: border-box;}
   html,body{height:100%; margin:0; padding:0;}
 
   body {
@@ -66,7 +65,7 @@
   .item{
     width:110px;
     cursor:pointer;
-    border-radius:var(--card-radius);
+    border-radius:30px;
     background:rgba(255,255,255,0.05);
     padding:8px;
     display:flex;
@@ -89,7 +88,7 @@
 
   .item:hover,
   .item.selected{
-    transform:translateY(-6px) scale(1.06);
+    transform:translateX(-6px) scale(1.07);
     box-shadow:0 8px 14px rgba(0,0,0,0.35);
     z-index:20;
   }
@@ -97,6 +96,10 @@
   .menu:hover .item:not(:hover):not(.selected){
     transform:scale(0.96);
     opacity:.88;
+  }
+
+  .item:focus{
+    outline: none;
   }
 
   #cache-status{
@@ -109,6 +112,7 @@
     z-index:9999;
     display:none;
   }
+
 </style>
 </head>
 
@@ -117,7 +121,7 @@
 <div class="top-bar">
   <span>jailbreak 9.00 version</span>
   <span>PS4Master</span>
-  <span>Have a demo offline cash</span>
+  <span>Have demo offline cache</span>
 </div>
 
 <div class="footer-info">Selected: <span id="selected">PS4 Updates</span></div>
@@ -190,7 +194,7 @@
   });
 </script>
 
-<!-- js generated AI -->
+
 <script>
 if ('serviceWorker' in navigator) {
 
@@ -209,8 +213,6 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
-
-
 
 
 
